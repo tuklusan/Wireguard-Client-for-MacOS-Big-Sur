@@ -35,12 +35,14 @@ with the values issued by your server. Do not commit private profiles.
 
 ## Installation
 
-1. Copy this repository to the Intel Mac.
-2. Run `scripts/install-fresh-intel-bigsur.sh`.
+1. Copy this repository to the Intel Mac running macOS Big Sur 11 through Sequoia 15.
+2. Run `scripts/install-fresh-intel-bigsur.sh`. On Big Sur it uses the bundled
+   MacPorts package; on Monterey through Sequoia it requires Homebrew for Bash.
 3. Edit `~/client-eth-macos-intel.conf` and
    `~/client-wifi-macos-intel.conf` with the separate client credentials.
 4. Set `WIREGUARD_SERVER_PROBE_ADDRESS` to the tunnel gateway address.
-5. Run one start script at a time with `/opt/local/bin/bash`.
+5. Run one start script at a time with the installed Bash 4+ path, normally
+   `/opt/local/bin/bash` on Big Sur or `/usr/local/bin/bash` on newer Intel macOS.
 
 Each start script uses `wg show <interface> transfer` directly. It requires a
 successful probe and increases in both WireGuard RX and TX byte counters. The

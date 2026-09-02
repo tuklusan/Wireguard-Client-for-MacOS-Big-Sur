@@ -8,12 +8,21 @@ MACPORTS_PKG="$REPO_DIR/artifacts/MacPorts-2.12.3-11-BigSur.pkg"
 WIREGUARD_PKG="$REPO_DIR/artifacts/WireGuard-compat-full.pkg"
 
 [ "$(uname -m)" = x86_64 ] || { echo "ERROR: Intel macOS is required." >&2; exit 2; }
-case "$(sw_vers -productVersion)" in 11.*) ;; *) echo "ERROR: macOS Big Sur 11.x is required." >&2; exit 2 ;; esac
+OS_VERSION="$(sw_vers -productVersion)"
+case "$OS_VERSION" in
+    11.*|12.*|13.*|14.*|15.*) ;;
+    *) echo "ERROR: supported versions are macOS Big Sur 11 through Sequoia 15." >&2; exit 2 ;;
+esac
 [ -f "$MACPORTS_PKG" ] && [ -f "$WIREGUARD_PKG" ] || { echo "ERROR: installer artifacts are missing." >&2; exit 2; }
 
-if [ ! -x /opt/local/bin/port ]; then sudo installer -pkg "$MACPORTS_PKG" -target /; fi
-sudo /opt/local/bin/port selfupdate
-sudo /opt/local/bin/port install bash
+if [[ "$OS_VERSION" == 11.* ]]; then
+    if [ ! -x /opt/local/bin/port ]; then sudo installer -pkg "$MACPORTS_PKG" -target /; fi
+    sudo /opt/local/bin/port selfupdate
+    sudo /opt/local/bin/port install bash
+else
+    command -v /usr/local/bin/brew >/dev/null 2>&1 || { echo "ERROR: Homebrew is required on macOS 12 through 15." >&2; exit 2; }
+    /usr/local/bin/brew install bash
+fi
 sudo installer -pkg "$WIREGUARD_PKG" -target /
 
 install -m 600 "$REPO_DIR/configs/client-eth-macos-intel.conf.example" "$HOME/client-eth-macos-intel.conf"
