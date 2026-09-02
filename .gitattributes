@@ -1,0 +1,4 @@
+* text eol=lf
+*.pkg binary
+*.tbz2 binary
+*.tar binary

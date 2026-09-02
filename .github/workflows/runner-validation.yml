@@ -1,0 +1,61 @@
+name: Intel macOS tunnel validation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bundled client tools
+        run: |
+          set -eu
+          brew install bash
+          sudo installer -pkg artifacts/WireGuard-compat-full.pkg -target /
+          if [ -f artifacts/MacPorts-2.12.3-11-BigSur.pkg ]; then
+            sudo installer -pkg artifacts/MacPorts-2.12.3-11-BigSur.pkg -target / || true
+          fi
+
+      - name: Validate both tunnels sequentially
+        env:
+          WG_ETH_CONFIG: ${{ secrets.WG_ETH_CONFIG }}
+          WG_WIFI_CONFIG: ${{ secrets.WG_WIFI_CONFIG }}
+          WG_ETH_PROBE: ${{ secrets.WG_ETH_PROBE }}
+          WG_WIFI_PROBE: ${{ secrets.WG_WIFI_PROBE }}
+        run: |
+          set -eu
+          command -v /usr/local/bin/wg >/dev/null
+          command -v /usr/local/bin/wg-quick >/dev/null
+          BASH4=/usr/local/bin/bash
+          [ -x "$BASH4" ] || BASH4=/opt/local/bin/bash
+          [ -x "$BASH4" ] || { echo 'Bash 4+ is required.' >&2; exit 2; }
+          [ -n "$WG_ETH_CONFIG" ] && [ -n "$WG_WIFI_CONFIG" ]
+          [ -n "$WG_ETH_PROBE" ] && [ -n "$WG_WIFI_PROBE" ]
+          umask 077
+          trap 'sudo "$BASH4" /usr/local/bin/wg-quick down wg-eth >/dev/null 2>&1 || true; sudo "$BASH4" /usr/local/bin/wg-quick down wg-wifi >/dev/null 2>&1 || true; rm -f "$HOME/client-eth.conf" "$HOME/client-wifi.conf"' EXIT
+          printf '%s\n' "$WG_ETH_CONFIG" > "$HOME/client-eth.conf"
+          printf '%s\n' "$WG_WIFI_CONFIG" > "$HOME/client-wifi.conf"
+          if grep -q 'REPLACE_WITH_' "$HOME/client-eth.conf"; then exit 2; fi
+          if grep -q 'REPLACE_WITH_' "$HOME/client-wifi.conf"; then exit 2; fi
+          sudo mkdir -p /usr/local/etc/wireguard
+          sudo ln -sfn "$HOME/client-eth.conf" /usr/local/etc/wireguard/wg-eth.conf
+          sudo ln -sfn "$HOME/client-wifi.conf" /usr/local/etc/wireguard/wg-wifi.conf
+
+          test_tunnel() {
+            name="$1"
+            probe="$2"
+            sudo "$BASH4" /usr/local/bin/wg-quick up "$name"
+            interface="$(sudo /usr/local/bin/wg show interfaces | awk '{print $NF}')"
+            read -r rx0 tx0 < <(sudo /usr/local/bin/wg show "$interface" transfer | awk '{rx += $2; tx += $3} END {print rx + 0, tx + 0}')
+            sleep 20
+            ping -c 3 -W 1 "$probe" >/dev/null
+            read -r rx1 tx1 < <(sudo /usr/local/bin/wg show "$interface" transfer | awk '{rx += $2; tx += $3} END {print rx + 0, tx + 0}')
+            [ "$rx1" -gt "$rx0" ] && [ "$tx1" -gt "$tx0" ]
+            echo "$name verified: RX $rx0 -> $rx1, TX $tx0 -> $tx1 bytes"
+            sudo "$BASH4" /usr/local/bin/wg-quick down "$name"
+          }
+
+          test_tunnel wg-eth "$WG_ETH_PROBE"
+          test_tunnel wg-wifi "$WG_WIFI_PROBE"

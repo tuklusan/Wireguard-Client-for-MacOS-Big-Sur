@@ -1,0 +1,12 @@
+# Copyright (c) 2026 Supratim Sanyal of SANYALnet Labs.
+# Licensed under the SANYALnet Labs Non-Commercial License; see ../LICENSE.
+[Interface]
+PrivateKey = REPLACE_WITH_CLIENT_PRIVATE_KEY_BASE64
+Address = REPLACE_WITH_CLIENT_TUNNEL_ADDRESS/32
+DNS = 94.140.14.15, 94.140.15.16
+
+[Peer]
+PublicKey = REPLACE_WITH_SERVER_PUBLIC_KEY_BASE64
+Endpoint = REPLACE_WITH_SERVER_HOST_OR_IP:REPLACE_WITH_SERVER_PORT
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
