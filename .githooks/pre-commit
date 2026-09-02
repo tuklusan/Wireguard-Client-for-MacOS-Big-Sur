@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+bash scripts/public-gate.sh
+git diff --cached --check

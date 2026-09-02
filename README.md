@@ -95,6 +95,15 @@ license hash, rejects private deployment details, and rejects blocked wording
 from tracked text files. The mandated license text is checked separately and
 kept verbatim.
 
+Enable the committed hooks once after cloning:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The pre-commit and pre-push hooks run the gate automatically; pre-commit also
+checks staged file whitespace.
+
 The optional `runner-validation.yml` workflow repeats the same sequential
 counter test on the oldest currently listed standard Intel macOS runner. It
 requires encrypted repository secrets named `WG_ETH_CONFIG`, `WG_WIFI_CONFIG`,
