@@ -43,6 +43,14 @@ These results validate the supplied client materials against the configured
 server at that time. They do not claim that a new server configuration remains
 unchanged.
 
+The manual runner validation also passed on 2026-09-02 using `macos-15-intel`
+(macOS 15.7.9). The sequential direct-counter results were:
+
+- Ethernet: RX `92 -> 1,289,580`; TX `456,976 -> 485,952`.
+- Wi-Fi: RX `92 -> 101,240`; TX `872,048 -> 896,876`.
+
+Both tunnels were disconnected by the workflow cleanup.
+
 ## Pinned materials
 
 - MacPorts base package for Intel Big Sur
