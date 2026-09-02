@@ -4,6 +4,12 @@ Reusable Intel macOS Big Sur materials for two independently configured
 WireGuard client tunnels. The project is maintained by Supratim Sanyal of
 SANYALnet Labs.
 
+> **Compatibility tested: macOS Big Sur 11.7.11 and macOS Sequoia 15.7.9.**
+> Based on successful testing at both endpoints, this client is likely to work
+> on Intel macOS versions from Big Sur 11 through Sequoia 15. Intermediate
+> versions are not individually certified; test the target system before
+> production use.
+
 Project home: [SANYALnet Labs blog](https://supratim-sanyal.blogspot.com/)
 
 ## Scope
@@ -11,6 +17,9 @@ Project home: [SANYALnet Labs blog](https://supratim-sanyal.blogspot.com/)
 This bundle contains pinned installer artifacts, source snapshots, example
 client profiles, and start/stop scripts. It targets Intel macOS 11.x and the
 Darwin userspace implementation of WireGuard.
+
+The same client materials were also validated on Intel macOS Sequoia 15.7.9.
+The tested compatibility span is therefore macOS Big Sur 11 through Sequoia 15.
 
 The two example profiles intentionally contain placeholders. Create private
 copies in your home directory, then replace every `REPLACE_WITH_...` value
